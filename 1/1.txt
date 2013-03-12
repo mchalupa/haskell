@@ -1,0 +1,36 @@
+21. 2. 2013
+
+prekladac je vlastne curryifikovany interpret (nebo naopak?) 
+prekl: source -> neco -> vstup
+interpr: source + vstup -> neco
+
+na zacatku se pise
+Module Main ( main) where
+
+-- program...
+
+spustit ghci, :l jmeno_modulu_(muze_byt_bez_.hs)
+
+.lhs  literarni kod
+
+normalne se pirse komentar a kdyz chceme napsat kod, tak na zacatek radku dame >
+viz ukazka 1.lhs
+
+zkus si precist prelude, jen tak pro inspiraci
+
+rozdil mezi :l module  a :m [+-] module - load prida nase soubory, :m prida moduly
+
+cabal:
+stahnout cabal-install
+spustit bootstrap.sh
+
+install happy a hlint (happy je dependece pro hlint)
+
+v home vytvorit HLint.hs s obsahem
+
+import "hint" HLint.Dollar
+import "hint" HLint.Default
+
+je to i v .cabal/share/hlintxxxxx/HLint.hs
+
+otherwise neni syntax, otherwise je alias pro True
