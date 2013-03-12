@@ -19,7 +19,7 @@ rangeSize :: Char -> Char -> Int
 rangeSize a b = 1 + diff a b
     where
         diff :: Char -> Char -> Int 
-        diff a b = abs $ fromEnum a - fromEnum b
+        diff x y = abs $ fromEnum x - fromEnum y
 
 -- | Velikost rozsahu hodnot, ve kterem pracuji cifry
 range :: Int
@@ -42,8 +42,8 @@ encryptSubstitution :: [(Char, Char)] -- ^ Permutation
                     -> String         -- ^ Plain text
                     -> String         -- ^ Cipher text
 encryptSubstitution [] str = str
-encryptSubstitution l s = if isPermutation l
-                            then map snd $ subst l (map makeTuple s)
+encryptSubstitution p s = if isPermutation p
+                            then map snd $ subst p (map makeTuple s)
                             else error "Nejedna se o permutaci"
     where
         isPermutation :: [(Char, Char)] -> Bool
@@ -53,13 +53,15 @@ encryptSubstitution l s = if isPermutation l
                 perm [] (a,b) = a == b
                 perm (x:rx) a = (fst x == snd a) && perm rx (fst a, snd x)
 
+                sortedPerm :: Eq a => [(a,a)] -> [(a,a)]
                 sortedPerm = sortBy (\a b -> if snd a == fst b then LT else GT)
        
+        makeTuple :: a -> (a,a)
         makeTuple x = (x,x)
          
         subst :: [(Char, Char)] -> [(Char, Char)] -> [(Char, Char)]
-        subst [] s = s 
-        subst (x:rx) s = subst rx (map (xchng x) s)
+        subst [] str = str 
+        subst (x:rx) str = subst rx (map (xchng x) str)
             where
                 -- | pokud se shoduje prvni znak v tuple, tak ho nahrad permutaci
                 xchng :: (Char, Char) -> (Char, Char) -> (Char, Char)
@@ -100,7 +102,7 @@ encryptCaesar :: Int    -- ^ Posun
 encryptCaesar p = map (shift p)
     where
         shift :: Int -> Char -> Char
-        shift p z = toEnum $ (p + fromEnum z) `mod` range
+        shift n c = toEnum $ (n + fromEnum c) `mod` range
 
 -- | Od kazdeho znaku vstupniho Stringu odecte dany posun modulo (length ['\0'..maxBound]).
 --
@@ -114,7 +116,7 @@ decryptCaesar :: Int    -- ^ Posun
 decryptCaesar p = map (shift p)
     where
         shift :: Int -> Char -> Char
-        shift p z = toEnum $ (fromEnum z - p) `mod` range
+        shift n z = toEnum $ (fromEnum z - n) `mod` range
 
 -- | Ke kazdemu znaku vstupniho Stringu pricte prislusny znak klice modulo (length ['\0'..maxBound]).
 --
@@ -168,7 +170,15 @@ encryptBlock :: [String -> String] -- ^ Funkce
              -> Int                -- ^ Velikost bloku
              -> String             -- ^ Plain text
              -> String             -- ^ Cipher text
-encryptBlock = undefined
+encryptBlock fl blockSize text
+	| null fl = text
+	| blockSize <= 0 = text
+	| otherwise = concat $ zipWith ($) ((concat . repeat) fl) (textBlocks blockSize text)
+    where
+        textBlocks :: Int -> String -> [String]
+        textBlocks _ "" = []
+        textBlocks 0 _= []
+        textBlocks size t = take size t : textBlocks size (drop size t)
 
 -- | Kazdy blok dane delky (pripadne kratsi, jedna-li se o posledni blok) desifruje dle prislusne funkce.
 --
@@ -182,5 +192,5 @@ decryptBlock :: [String -> String] -- ^ Funkce
              -> Int                -- ^ Velikost bloku
              -> String             -- ^ Cipher text
              -> String             -- ^ Plain text
-decryptBlock = undefined
+decryptBlock = encryptBlock
 
